@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  api-innovatech:
+    name: Build API Innovatech (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install and Build
+        working-directory: api-innovatech
+        run: |
+          npm ci
+          npm run build --if-present
+      - name: Run tests
+        working-directory: api-innovatech
+        run: |
+          npm test --if-present
+
+  front-despacho:
+    name: Build Front (Vite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install and Build
+        working-directory: front_despacho
+        run: |
+          npm ci
+          npm run build --if-present
+      - name: Run tests
+        working-directory: front_despacho
+        run: npm test --if-present
+
+  back-ventas:
+    name: Build Back Ventas (Maven)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build with Maven
+        working-directory: back-Ventas_SpringBoot/Springboot-API-REST
+        run: |
+          chmod +x mvnw || true
+          ./mvnw -B -DskipTests package
+
+  back-despachos:
+    name: Build Back Despachos (Maven)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build with Maven
+        working-directory: back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+        run: |
+          chmod +x mvnw || true
+          ./mvnw -B -DskipTests package
