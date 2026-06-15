@@ -72,8 +72,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/LabRole
-          role-skip-session-tagging: true
+
 
       - uses: aws-actions/amazon-ecr-login@v2
       - uses: docker/setup-buildx-action@v3
@@ -104,8 +103,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/LabRole
-          role-skip-session-tagging: true
+
 
       - uses: azure/setup-kubectl@v4
         with:
@@ -141,8 +139,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/LabRole
-          role-skip-session-tagging: true
+
 
       - uses: azure/setup-kubectl@v4
         with:
@@ -157,3 +154,4 @@ jobs:
         run: |
           chmod +x scripts/validate-deployment.sh
           ./scripts/validate-deployment.sh
+
