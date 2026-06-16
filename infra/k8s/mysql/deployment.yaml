@@ -38,6 +38,16 @@ spec:
                 secretKeyRef:
                   name: innovatech-db-secret
                   key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: innovatech-config
+                  key: DB_NAME
+            - name: MYSQL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: innovatech-config
+                  key: DB_USERNAME
 
           # Variables no sensibles desde ConfigMap
           envFrom:
