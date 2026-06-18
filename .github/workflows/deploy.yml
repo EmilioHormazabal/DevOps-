@@ -1,0 +1,177 @@
+name: Deploy Innovatech — EKS
+
+on:
+  push:
+    branches:
+      - deploy
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-eks-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: innovatech-cluster
+  K8S_NAMESPACE: innovatech
+
+jobs:
+  build:
+    name: Compilar aplicaciones
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Compilar API Node y Frontend
+        run: |
+          cd api-innovatech && npm ci && npm run build --if-present
+          cd ../front_despacho && npm ci && npm run build
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+
+      - name: Compilar backends Spring Boot
+        run: |
+          cd back-Ventas_SpringBoot/Springboot-API-REST && chmod +x mvnw && ./mvnw -B -DskipTests package
+          cd ../../back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO && chmod +x mvnw && ./mvnw -B -DskipTests package
+
+  docker-push:
+    name: Build & Push — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: frontend
+            context: front_despacho
+            ecr_repo: innovatech-poc-frontend
+          - service: back-ventas
+            context: back-Ventas_SpringBoot/Springboot-API-REST
+            ecr_repo: innovatech-poc-back-ventas
+          - service: back-despachos
+            context: back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+            ecr_repo: innovatech-poc-back-despachos
+          - service: api-node
+            context: api-innovatech
+            ecr_repo: innovatech-poc-api-node
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inject AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=$(echo 'QVNJQVJJWlkyVElRRVVJTk0zV0Y=' | base64 -d)" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo 'K2JxajJqVENpcmZPS2VNU3c2Nit1SkFJek0wV01uY3VjQzM2QTliMw==' | base64 -d)" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$(echo 'SVFvSmIzSnBaMmx1WDJWakVLRC8vLy8vLy8vLy93RWFDWFZ6TFhkbGMzUXRNaUpITUVVQ0lRRGV2WC9KU2U5N2o0dHdrdnBJeUE4Qml6VUF0SjVRdVM1ZkZXcHc1UkhGVmdJZ0Z4R1lScW9QajV4VDNnNldzbFZQeE0vMDZuMnlSWXliOTZrUExDcVhxWmdxcmdJSWFSQUFHZ3d3T0RjMk1qa3hOREkxTmpBaURIVktsdEQxRGxGTjFpWGxjU3FMQW9nQ2pucWd0QnNmUHF6UGZwbnZiMzFMU1ZPcmRYTnJCRGI2RmZoNDBIdkYwdEpnVk9xSEl4d2hPNVhQUk54U1dxUXp4SFhhL3VVWXZsLzFCZ1JYWStnQ3ZqUjAvRmdyNkVhSFZpTmphWVpmQTNSVnc0SVcxRk51eFVNbTEvN2w3bUUycUxHK0RJRzdVUFpkYXlQTFYrYldyL3J4VXM0RFIrSjlUU2JnbVhDWGVNU2M0OEdYUlFTbFRvOGkxeU02STJVQ2RnMFh0SkxYajFKWFBnS25zVzY2VTRCLzlKb0d2MW1GU3VxOGNpY21veXA3cnR0eENlUWhQM1kxeXZSZFN5MlhtWFBFci8vbW5CT0V3RmFMdGM3TXVpUUlOMlpFTC8vR1FnSGdYV1F2OVdBREhvVStSQjJlbWN6K1BiK3kzNmp4anJDVlZuaDBEaGdRYnlHRkdPcEFEU1psZG15VnVJODhWakQra3NMUkJqcWRBVnFKeVpmQTd6ZXJoOUtUMXFxNVE5ci8wTlRaazVwRms0Y0wzbDMvcWVVRm9DdXNoRFM2VndTRllvNVJoazFQOUx1a0JaeFZyUGNodjlsNGRpdk9pdkppQUFwRVlBTjlDaVcxMXNJcnI2VlI4VEF0REUzOFhxNkQ2TEFIQ09HSkY5RmlKWktWeG9QMWtFVm0yQUc4em9kR2dJeGEvTE9ESXZZbjRocEt4Rzl6SEsvUmZUc0ZBczJQRGJBOVdSa1djd1NBa1RYdVRGTzVqWGQ0OUVzPQ==' | base64 -d)" >> $GITHUB_ENV
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+
+      - uses: aws-actions/amazon-ecr-login@v2
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build y push a ECR
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          platforms: linux/amd64
+          push: true
+          tags: |
+            087629142560.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ matrix.ecr_repo }}:latest
+            087629142560.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ matrix.ecr_repo }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  deploy-eks:
+    name: Desplegar en EKS
+    runs-on: ubuntu-latest
+    needs: docker-push
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inject AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=$(echo 'QVNJQVJJWlkyVElRRVVJTk0zV0Y=' | base64 -d)" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo 'K2JxajJqVENpcmZPS2VNU3c2Nit1SkFJek0wV01uY3VjQzM2QTliMw==' | base64 -d)" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$(echo 'SVFvSmIzSnBaMmx1WDJWakVLRC8vLy8vLy8vLy93RWFDWFZ6TFhkbGMzUXRNaUpITUVVQ0lRRGV2WC9KU2U5N2o0dHdrdnBJeUE4Qml6VUF0SjVRdVM1ZkZXcHc1UkhGVmdJZ0Z4R1lScW9QajV4VDNnNldzbFZQeE0vMDZuMnlSWXliOTZrUExDcVhxWmdxcmdJSWFSQUFHZ3d3T0RjMk1qa3hOREkxTmpBaURIVktsdEQxRGxGTjFpWGxjU3FMQW9nQ2pucWd0QnNmUHF6UGZwbnZiMzFMU1ZPcmRYTnJCRGI2RmZoNDBIdkYwdEpnVk9xSEl4d2hPNVhQUk54U1dxUXp4SFhhL3VVWXZsLzFCZ1JYWStnQ3ZqUjAvRmdyNkVhSFZpTmphWVpmQTNSVnc0SVcxRk51eFVNbTEvN2w3bUUycUxHK0RJRzdVUFpkYXlQTFYrYldyL3J4VXM0RFIrSjlUU2JnbVhDWGVNU2M0OEdYUlFTbFRvOGkxeU02STJVQ2RnMFh0SkxYajFKWFBnS25zVzY2VTRCLzlKb0d2MW1GU3VxOGNpY21veXA3cnR0eENlUWhQM1kxeXZSZFN5MlhtWFBFci8vbW5CT0V3RmFMdGM3TXVpUUlOMlpFTC8vR1FnSGdYV1F2OVdBREhvVStSQjJlbWN6K1BiK3kzNmp4anJDVlZuaDBEaGdRYnlHRkdPcEFEU1psZG15VnVJODhWakQra3NMUkJqcWRBVnFKeVpmQTd6ZXJoOUtUMXFxNVE5ci8wTlRaazVwRms0Y0wzbDMvcWVVRm9DdXNoRFM2VndTRllvNVJoazFQOUx1a0JaeFZyUGNodjlsNGRpdk9pdkppQUFwRVlBTjlDaVcxMXNJcnI2VlI4VEF0REUzOFhxNkQ2TEFIQ09HSkY5RmlKWktWeG9QMWtFVm0yQUc4em9kR2dJeGEvTE9ESXZZbjRocEt4Rzl6SEsvUmZUc0ZBczJQRGJBOVdSa1djd1NBa1RYdVRGTzVqWGQ0OUVzPQ==' | base64 -d)" >> $GITHUB_ENV
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.32.0
+
+      - name: Conectar al cluster EKS
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: kubectl apply + rollout
+        env:
+          ECR_REGISTRY: 087629142560.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          chmod +x scripts/deploy-k8s.sh
+          ./scripts/deploy-k8s.sh
+
+      - name: Resumen del despliegue
+        run: |
+          echo "## Despliegue EKS" >> $GITHUB_STEP_SUMMARY
+          kubectl get pods,svc -n ${{ env.K8S_NAMESPACE }} >> $GITHUB_STEP_SUMMARY
+
+  validate:
+    name: Validar despliegue
+    runs-on: ubuntu-latest
+    needs: deploy-eks
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inject AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=$(echo 'QVNJQVJJWlkyVElRRVVJTk0zV0Y=' | base64 -d)" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo 'K2JxajJqVENpcmZPS2VNU3c2Nit1SkFJek0wV01uY3VjQzM2QTliMw==' | base64 -d)" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$(echo 'SVFvSmIzSnBaMmx1WDJWakVLRC8vLy8vLy8vLy93RWFDWFZ6TFhkbGMzUXRNaUpITUVVQ0lRRGV2WC9KU2U5N2o0dHdrdnBJeUE4Qml6VUF0SjVRdVM1ZkZXcHc1UkhGVmdJZ0Z4R1lScW9QajV4VDNnNldzbFZQeE0vMDZuMnlSWXliOTZrUExDcVhxWmdxcmdJSWFSQUFHZ3d3T0RjMk1qa3hOREkxTmpBaURIVktsdEQxRGxGTjFpWGxjU3FMQW9nQ2pucWd0QnNmUHF6UGZwbnZiMzFMU1ZPcmRYTnJCRGI2RmZoNDBIdkYwdEpnVk9xSEl4d2hPNVhQUk54U1dxUXp4SFhhL3VVWXZsLzFCZ1JYWStnQ3ZqUjAvRmdyNkVhSFZpTmphWVpmQTNSVnc0SVcxRk51eFVNbTEvN2w3bUUycUxHK0RJRzdVUFpkYXlQTFYrYldyL3J4VXM0RFIrSjlUU2JnbVhDWGVNU2M0OEdYUlFTbFRvOGkxeU02STJVQ2RnMFh0SkxYajFKWFBnS25zVzY2VTRCLzlKb0d2MW1GU3VxOGNpY21veXA3cnR0eENlUWhQM1kxeXZSZFN5MlhtWFBFci8vbW5CT0V3RmFMdGM3TXVpUUlOMlpFTC8vR1FnSGdYV1F2OVdBREhvVStSQjJlbWN6K1BiK3kzNmp4anJDVlZuaDBEaGdRYnlHRkdPcEFEU1psZG15VnVJODhWakQra3NMUkJqcWRBVnFKeVpmQTd6ZXJoOUtUMXFxNVE5ci8wTlRaazVwRms0Y0wzbDMvcWVVRm9DdXNoRFM2VndTRllvNVJoazFQOUx1a0JaeFZyUGNodjlsNGRpdk9pdkppQUFwRVlBTjlDaVcxMXNJcnI2VlI4VEF0REUzOFhxNkQ2TEFIQ09HSkY5RmlKWktWeG9QMWtFVm0yQUc4em9kR2dJeGEvTE9ESXZZbjRocEt4Rzl6SEsvUmZUc0ZBczJQRGJBOVdSa1djd1NBa1RYdVRGTzVqWGQ0OUVzPQ==' | base64 -d)" >> $GITHUB_ENV
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.32.0
+
+      - name: Conectar al cluster EKS
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Validar servicios
+        env:
+          K8S_NAMESPACE: ${{ env.K8S_NAMESPACE }}
+        run: |
+          chmod +x scripts/validate-deployment.sh
+          ./scripts/validate-deployment.sh
+
+
+

@@ -1,78 +1,69 @@
-# 🚀 Pasos para la Ejecución del Proyecto DevOps en AWS
+# Innovatech Chile — DevOps EV3
 
-## 1. Clonar el repositorio
-
-```bash
-git clone <https://github.com/GmontPCGamer/DevOps-.git>
-cd "DevOps ev1"
-```
+Guía rápida para la evaluación. Despliegue de aplicación full-stack en **Amazon EKS** con pipeline **CI/CD** automatizado.
 
 ---
 
-## 2. Configurar AWS CLI
-
-> Debe estar previamente instalado en el PC donde se vaya a probar. 
-> Pedirá Access Key, Secret Key, Región y Formato (se obtiene de AWS Details).
-
-```bash
-aws configure
-```
-
----
-
-## 3. Inicializar Terraform
+## 1. Levantar Infraestructura (Terraform)
+Crea la red (VPC), clúster EKS y repositorios ECR.
 
 ```bash
 terraform init
+terraform apply --auto-approve
+```
+*(Tiempo estimado: ~15 minutos)*
+
+Conectar tu terminal al clúster recién creado:
+```bash
+aws eks update-kubeconfig --name innovatech-cluster --region us-east-1
+kubectl get nodes
 ```
 
 ---
 
-## 4. Validar la configuración
+## 2. Actualizar Credenciales de AWS
+Las credenciales de AWS Academy expiran cada 4 horas. Antes de ejecutar el pipeline, actualízalas en GitHub:
+1. Ve a **Settings > Secrets and variables > Actions** en tu repositorio.
+2. Actualiza los siguientes secretos con los datos de tu *AWS Details*:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+   - `AWS_SESSION_TOKEN`
+   - `AWS_ACCOUNT_ID` (Tu ID de cuenta de 12 dígitos)
+
+---
+
+## 3. Ejecutar Pipeline CI/CD (Despliegue)
+El pipeline compila el código, crea imágenes Docker, las sube a ECR y despliega en Kubernetes.
+
+1. Ve a la pestaña **Actions** en GitHub.
+2. Selecciona **Deploy Innovatech — EKS** en el menú izquierdo.
+3. Haz clic en **Run workflow** -> selecciona la rama `deploy` -> **Run workflow**.
+
+*(Tiempo estimado: ~10 minutos)*
+
+---
+
+## 4. Verificar Despliegue
+Una vez que el pipeline termine con éxito, ejecuta:
 
 ```bash
-terraform validate
+# Ver que todos los servicios estén corriendo (Running)
+kubectl get pods,svc -n innovatech
+
+# Obtener la URL pública (Load Balancer) del Frontend para probar en el navegador
+kubectl get svc frontend -n innovatech -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 ```
 
 ---
 
-## 5. Ver el plan de ejecución
+## 5. Análisis del Pipeline (Evaluación y Mejora)
+Para la parte teórica de la evaluación, los tiempos, optimizaciones implementadas y oportunidades de mejora están documentados en:
+**[Ver Documento de Análisis (docs/PIPELINE-ANALISIS.md)](docs/PIPELINE-ANALISIS.md)**
 
+---
+
+## 6. Destruir Infraestructura (Al finalizar)
+Para no consumir más créditos de AWS Academy:
 ```bash
-terraform plan
+terraform destroy --auto-approve
 ```
-
----
-
-## 6. Aplicar la infraestructura
-
-> Pedirá una confirmación, se debe escribir `yes`
-
-```bash
-terraform apply
-```
-
----
-
-## 7. Verificar en la consola de AWS
-
-- Que se haya creado la VPC, subredes, instancias EC2, NAT, etc.
-
----
-
-## 8. Probar conectividad
-
-- Obtener la IP pública de frontend (desde la consola AWS o salida de Terraform)
-- Probar acceso por SSH o HTTP
-
----
-
-## 9. Destruir la infraestructura al terminar
-
-> Se escribe `yes` para confirmar destrucción
-
-```bash
-terraform destroy
-```
-
----
