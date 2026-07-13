@@ -38,7 +38,7 @@ jobs:
       - name: Instalar y Compilar
         working-directory: front_despacho
         run: |
-          npm config set ignore-platform true && npm ci
+          npm install
           npm run build --if-present
       - name: Ejecutar pruebas
         working-directory: front_despacho
