@@ -29,22 +29,13 @@ jobs:
         with:
           version: v1.32.0
 
-      - name: 5. Restaurar estado de Terraform
-        uses: actions/cache@v4
-        with:
-          path: |
-            *.tfstate*
-          key: terraform-state-${{ github.ref_name }}-${{ github.run_id }}
-          restore-keys: |
-            terraform-state-${{ github.ref_name }}-
-
-      - name: 6. Terraform Init
+      - name: 5. Terraform Init
         run: terraform init
 
-      - name: 7. Limpieza total de Kubernetes
+      - name: 6. Limpieza total de Kubernetes
         continue-on-error: true
         run: |
-          CLUSTER_NAME="$(terraform output -raw cluster_name 2>/dev/null || echo '')"
+          CLUSTER_NAME="$(terraform output -raw eks_cluster_name 2>/dev/null || echo '')"
           if [ -z "$CLUSTER_NAME" ]; then
             CLUSTER_NAME="$(aws eks list-clusters --query 'clusters[?contains(@,`innovatech`)]' --output text)"
           fi
@@ -55,7 +46,7 @@ jobs:
             kubectl delete svc --all --all-namespaces --ignore-not-found=true 2>/dev/null || true
           fi
 
-      - name: 8. Vaciar ECR (eliminar imagenes)
+      - name: 7. Vaciar ECR (eliminar imagenes)
         continue-on-error: true
         run: |
           for repo in $(aws ecr describe-repositories --query 'repositories[].repositoryName' --output text 2>/dev/null); do
@@ -68,6 +59,6 @@ jobs:
             fi
           done
 
-      - name: 9. Terraform Destroy
+      - name: 8. Terraform Destroy
         timeout-minutes: 45
         run: terraform destroy -auto-approve

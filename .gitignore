@@ -11,7 +11,10 @@ Thumbs.db
 *.tfstate
 *.tfstate.*
 *.tfstate.backup
+tfplan
+tfplan/
 crash.log
+crash.*.log
 
 # Variables sensibles y credenciales
 # IMPORTANTE: No subir estos archivos
@@ -29,6 +32,9 @@ __pycache__/
 *.exe
 *.dll
 *.so
+
+# Pruebas locales HTTP
+*.http
 
 # Archivos temporales y backups
 *.log
