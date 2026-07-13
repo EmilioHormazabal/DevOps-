@@ -1,4 +1,6 @@
-version: '3.9'
+networks:
+  innovatech-network:
+    driver: bridge
 
 services:
 
@@ -15,8 +17,15 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      # Persistencia de datos: los datos sobreviven al reinicio del contenedor
       - mysql_data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - innovatech-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ── Backend Ventas (Spring Boot, puerto 8080) ────────────────────────────────
   back-ventas:
@@ -33,7 +42,10 @@ services:
       DB_PASSWORD: innova1234
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/innovatech_db?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    networks:
+      - innovatech-network
 
   # ── Backend Despachos (Spring Boot, puerto 8081) ─────────────────────────────
   back-despachos:
@@ -50,7 +62,22 @@ services:
       DB_PASSWORD: innova1234
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/innovatech_db?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    networks:
+      - innovatech-network
+
+  # ── API Node (Express, puerto 3000) ──────────────────────────────────────────
+  api-node:
+    build: ./api-innovatech
+    container_name: innovatech-api-node
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+    networks:
+      - innovatech-network
 
   # ── Frontend React (Nginx, puerto 80) ────────────────────────────────────────
   frontend:
@@ -62,8 +89,9 @@ services:
     depends_on:
       - back-ventas
       - back-despachos
+    networks:
+      - innovatech-network
 
 # ── Volúmenes ──────────────────────────────────────────────────────────────────
 volumes:
   mysql_data:
-    # Docker administra este volumen; los datos persisten aunque el contenedor se elimine
