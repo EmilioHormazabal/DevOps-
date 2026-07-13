@@ -58,7 +58,7 @@ jobs:
         working-directory: back-Ventas_SpringBoot/Springboot-API-REST
         run: |
           chmod +x mvnw || true
-          ./mvnw -B -DskipTests package
+          ./mvnw -B package
 
   back-despachos:
     name: Construir Backend Despachos (Maven)
@@ -74,4 +74,4 @@ jobs:
         working-directory: back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
         run: |
           chmod +x mvnw || true
-          ./mvnw -B -DskipTests package
+          ./mvnw -B package

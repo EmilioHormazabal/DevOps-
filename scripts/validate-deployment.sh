@@ -46,7 +46,7 @@ check_internal() {
 check_internal back-ventas 8080 8080 /actuator/health
 check_internal back-despachos 8081 8081 /actuator/health
 check_internal api-node 3000 3000 /health
-check_internal frontend 8080 80 /
+check_internal frontend 8082 80 /
 
 echo "==> Esperando Load Balancer del frontend (máx ${LB_TIMEOUT}s)..."
 LB_HOST=""
