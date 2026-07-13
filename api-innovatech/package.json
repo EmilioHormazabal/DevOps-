@@ -5,18 +5,26 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "test": "jest --forceExit"
   },
-  "keywords": ["api", "rest", "innovatech", "docker"],
+  "keywords": [
+    "api",
+    "rest",
+    "innovatech",
+    "docker"
+  ],
   "author": "Innovatech Chile",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^4.18.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "cors": "^2.8.5"
+    "express": "^4.18.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.0",
+    "supertest": "^7.2.2"
   }
 }
