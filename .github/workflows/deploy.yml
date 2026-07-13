@@ -30,7 +30,7 @@ jobs:
       - name: Compilar API Node y Frontend
         run: |
           cd api-innovatech && npm ci && npm run build --if-present
-          cd ../front_despacho && npm ci && npm run build
+          cd front_despacho && npm ci && npm run build
 
       - uses: actions/setup-java@v4
         with:
@@ -39,8 +39,8 @@ jobs:
 
       - name: Compilar backends Spring Boot
         run: |
-          cd back-Ventas_SpringBoot/Springboot-API-REST && chmod +x mvnw && ./mvnw -B -DskipTests package
-          cd ../../back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO && chmod +x mvnw && ./mvnw -B -DskipTests package
+          cd back-Ventas_SpringBoot/Springboot-API-REST && chmod +x mvnw && ./mvnw -B package
+          cd back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO && chmod +x mvnw && ./mvnw -B package
 
   docker-push:
     name: Build & Push — ${{ matrix.service }}
@@ -113,6 +113,18 @@ jobs:
 
       - name: Conectar al cluster EKS
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Namespace + Metrics Server + Secrets
+        run: |
+          kubectl apply -f infra/k8s/namespace/
+          kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+          kubectl rollout status deployment/metrics-server -n kube-system --timeout=180s
+          kubectl create secret generic innovatech-db-secret \
+            -n innovatech \
+            --from-literal=MYSQL_ROOT_PASSWORD='${{ secrets.MYSQL_ROOT_PASSWORD }}' \
+            --from-literal=MYSQL_PASSWORD='${{ secrets.MYSQL_PASSWORD }}' \
+            --from-literal=DB_PASSWORD='${{ secrets.MYSQL_PASSWORD }}' \
+            --dry-run=client -o yaml | kubectl apply -f -
 
       - name: kubectl apply + rollout
         env:
