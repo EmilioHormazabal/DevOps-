@@ -15,4 +15,5 @@ spec:
   ports:
     - port: 80          # puerto p├║blico del Load Balancer
       targetPort: 80    # puerto interno del contenedor Nginx
-  type: LoadBalancer    # expone el servicio fuera del cl├║ster v├¡a AWS ELB
+  type: LoadBalancer
+

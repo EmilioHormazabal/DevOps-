@@ -65,9 +65,9 @@ variable "ssh_allowed_cidr" {
 }
 
 variable "database_port" {
-  description = "Puerto de base de datos expuesto por SG Data (5432 PostgreSQL o 3306 MySQL)."
+  description = "Puerto de base de datos expuesto por SG Data (3306 MySQL o 5432 PostgreSQL)."
   type        = number
-  default     = 5432
+  default     = 3306
 
   validation {
     condition     = contains([3306, 5432], var.database_port)
