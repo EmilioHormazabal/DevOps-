@@ -1,69 +1,82 @@
-# Innovatech Chile — DevOps EV3
+# Innovatech Chile — DevOps CI/CD
 
-Guía rápida para la evaluación. Despliegue de aplicación full-stack en **Amazon EKS** con pipeline **CI/CD** automatizado.
+Proyecto de automatización del ciclo CI/CD para una plataforma multicomponente desplegada en AWS EKS.
 
----
+## Stack
 
-## 1. Levantar Infraestructura (Terraform)
-Crea la red (VPC), clúster EKS y repositorios ECR.
+| Componente | Tecnología | Puerto |
+|------------|-----------|--------|
+| Frontend | React + Vite + Nginx | 80 |
+| API Ventas | Spring Boot 17 | 8080 |
+| API Despachos | Spring Boot 17 | 8081 |
+| API Node (mock) | Express | 3000 |
+| Base de datos | MySQL 8.0 | 3306 |
 
-```bash
-terraform init
-terraform apply --auto-approve
+## Arquitectura
+
 ```
-*(Tiempo estimado: ~15 minutos)*
-
-Conectar tu terminal al clúster recién creado:
-```bash
-aws eks update-kubeconfig --name innovatech-cluster --region us-east-1
-kubectl get nodes
-```
-
----
-
-## 2. Actualizar Credenciales de AWS
-Las credenciales de AWS Academy expiran cada 4 horas. Antes de ejecutar el pipeline, actualízalas en GitHub:
-1. Ve a **Settings > Secrets and variables > Actions** en tu repositorio.
-2. Actualiza los siguientes secretos con los datos de tu *AWS Details*:
-   - `AWS_ACCESS_KEY_ID`
-   - `AWS_SECRET_ACCESS_KEY`
-   - `AWS_SESSION_TOKEN`
-   - `AWS_ACCOUNT_ID` (Tu ID de cuenta de 12 dígitos)
-
----
-
-## 3. Ejecutar Pipeline CI/CD (Despliegue)
-El pipeline compila el código, crea imágenes Docker, las sube a ECR y despliega en Kubernetes.
-
-1. Ve a la pestaña **Actions** en GitHub.
-2. Selecciona **Deploy Innovatech — EKS** en el menú izquierdo.
-3. Haz clic en **Run workflow** -> selecciona la rama `deploy` -> **Run workflow**.
-
-*(Tiempo estimado: ~10 minutos)*
-
----
-
-## 4. Verificar Despliegue
-Una vez que el pipeline termine con éxito, ejecuta:
-
-```bash
-# Ver que todos los servicios estén corriendo (Running)
-kubectl get pods,svc -n innovatech
-
-# Obtener la URL pública (Load Balancer) del Frontend para probar en el navegador
-kubectl get svc frontend -n innovatech -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+[Usuario] → LoadBalancer :80 → Nginx (proxy reverso)
+                                  ├── /api/ventas/ → back-ventas :8080 → MySQL :3306
+                                  └── /api/despachos/ → back-despachos :8081 → MySQL :3306
 ```
 
----
+## Requisitos
 
-## 5. Análisis del Pipeline (Evaluación y Mejora)
-Para la parte teórica de la evaluación, los tiempos, optimizaciones implementadas y oportunidades de mejora están documentados en:
-**[Ver Documento de Análisis (docs/PIPELINE-ANALISIS.md)](docs/PIPELINE-ANALISIS.md)**
+- Docker + Docker Compose
+- Node.js 18
+- Java 17 (Temurin)
+- AWS CLI + cuenta AWS (para deploy en nube)
 
----
+## Entorno local
 
-## 6. Destruir Infraestructura (Al finalizar)
-Para no consumir más créditos de AWS Academy:
 ```bash
-terraform destroy --auto-approve
+docker compose up --build
 ```
+
+Servicios disponibles:
+- Frontend: http://localhost:80
+- API Ventas: http://localhost:8080
+- API Despachos: http://localhost:8081
+- API Node: http://localhost:3000
+
+## Tests
+
+```bash
+# API Node
+cd api-innovatech && npm test
+
+# Frontend
+cd front_despacho && npx vitest run
+
+# Backend Ventas
+cd back-Ventas_SpringBoot/Springboot-API-REST && ./mvnw test
+
+# Backend Despachos
+cd back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO && ./mvnw test
+```
+
+**Total: 24 tests** (9 api-node + 2 frontend + 10 ventas + 3 despachos)
+
+## Pipelines CI/CD (GitHub Actions)
+
+| Pipeline | Trigger | Jobs |
+|----------|---------|------|
+| `ci.yml` | push/PR a main | build + test (4 jobs paralelos) |
+| `deploy.yml` | push a deploy/main + manual | build → push ECR → deploy EKS → validate |
+| `destroy.yml` | manual (workflow_dispatch) | cleanup K8s → vaciar ECR → terraform destroy |
+
+## Infraestructura AWS (Terraform)
+
+- VPC con subnets pública y privada
+- EKS Cluster v1.32, 2 nodos t3.medium (autoescalable 2-4)
+- ECR: 4 repositorios con scan on push
+- CloudWatch Logs (7 días retención)
+
+## Documentación
+
+- `docs/TORPEDO.md` — Resumen técnico para la defensa
+- `docs/INFORME_DESPLIEGUE.md` — Base del informe Word
+- `docs/GUIA_DE_ESTUDIO.md` — Guía de estudio
+- `docs/PIPELINE-ANALISIS.md` — Análisis del pipeline
+- `docs/arquitectura-aws.svg` — Diagrama de arquitectura
+- `GITFLOW.md` — Flujo de trabajo Git

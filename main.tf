@@ -259,6 +259,10 @@ resource "aws_launch_template" "lt_front" {
   instance_type = var.instance_type
   key_name      = var.key_name
 
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2.name
+  }
+
   network_interfaces {
     subnet_id                   = aws_subnet.public_frontend.id
     associate_public_ip_address = true
@@ -282,6 +286,10 @@ resource "aws_launch_template" "lt_back" {
   instance_type = var.instance_type
   key_name      = var.key_name
 
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2.name
+  }
+
   network_interfaces {
     subnet_id                   = aws_subnet.private_backend_data.id
     associate_public_ip_address = false
@@ -304,6 +312,10 @@ resource "aws_launch_template" "lt_data" {
   image_id      = data.aws_ami.amazon_linux_2.id
   instance_type = var.instance_type
   key_name      = var.key_name
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2.name
+  }
 
   network_interfaces {
     subnet_id                   = aws_subnet.private_backend_data.id
