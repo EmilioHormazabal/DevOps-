@@ -23,7 +23,7 @@ Proyecto de automatización del ciclo CI/CD para una plataforma multicomponente 
 ## Requisitos
 
 - Docker + Docker Compose
-- Node.js 18
+- Node.js 20
 - Java 17 (Temurin)
 - AWS CLI + cuenta AWS (para deploy en nube)
 
@@ -63,7 +63,6 @@ cd back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO && ./mvnw test
 |----------|---------|------|
 | `ci.yml` | push/PR a main | build + test (4 jobs paralelos) |
 | `deploy.yml` | push a deploy/main + manual | build → push ECR → deploy EKS → validate |
-| `destroy.yml` | manual (workflow_dispatch) | cleanup K8s → vaciar ECR → terraform destroy |
 
 ## Infraestructura AWS (Terraform)
 

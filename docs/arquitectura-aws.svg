@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#555"/>
+    </marker>
+    <linearGradient id="header" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#232F3E"/>
+      <stop offset="100%" stop-color="#FF9900"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="700" fill="#F5F5F5" rx="10"/>
+
+  <rect width="1000" height="50" fill="url(#header)" rx="10"/>
+  <text x="500" y="32" text-anchor="middle" fill="white" font-size="18" font-weight="bold">Innovatech Chile — Arquitectura AWS</text>
+
+  <rect x="30" y="70" width="940" height="150" fill="white" stroke="#232F3E" stroke-width="2" rx="8"/>
+  <text x="50" y="95" fill="#232F3E" font-size="14" font-weight="bold">CI/CD — GitHub Actions</text>
+
+  <rect x="50" y="110" width="130" height="50" fill="#E8E8E8" stroke="#555" rx="5"/>
+  <text x="115" y="140" text-anchor="middle" fill="#333" font-size="12" font-weight="bold">Build</text>
+
+  <rect x="210" y="110" width="130" height="50" fill="#E8E8E8" stroke="#555" rx="5"/>
+  <text x="275" y="140" text-anchor="middle" fill="#333" font-size="12" font-weight="bold">Test (24 tests)</text>
+
+  <rect x="370" y="110" width="130" height="50" fill="#E8E8E8" stroke="#555" rx="5"/>
+  <text x="435" y="140" text-anchor="middle" fill="#333" font-size="12" font-weight="bold">Push ECR</text>
+
+  <rect x="530" y="110" width="130" height="50" fill="#E8E8E8" stroke="#555" rx="5"/>
+  <text x="595" y="140" text-anchor="middle" fill="#333" font-size="12" font-weight="bold">Deploy EKS</text>
+
+  <rect x="690" y="110" width="130" height="50" fill="#E8E8E8" stroke="#555" rx="5"/>
+  <text x="755" y="140" text-anchor="middle" fill="#333" font-size="12" font-weight="bold">Validate</text>
+
+  <line x1="180" y1="135" x2="205" y2="135" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="340" y1="135" x2="365" y2="135" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="500" y1="135" x2="525" y2="135" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="660" y1="135" x2="685" y2="135" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="50" y="180" width="940" height="25" fill="#FF9900" opacity="0.2" rx="3"/>
+  <text x="500" y="197" text-anchor="middle" fill="#333" font-size="11">Amazon ECR — 4 repos: frontend, back-ventas, back-despachos, api-node</text>
+
+  <rect x="30" y="240" width="940" height="440" fill="white" stroke="#FF9900" stroke-width="2" rx="8"/>
+  <text x="50" y="265" fill="#FF9900" font-size="14" font-weight="bold">AWS Cloud — us-east-1</text>
+
+  <rect x="50" y="280" width="900" height="380" fill="#E8F0FE" stroke="#1967D2" stroke-width="1.5" rx="6" stroke-dasharray="5,3"/>
+  <text x="70" y="300" fill="#1967D2" font-size="12" font-weight="bold">VPC 10.0.0.0/16</text>
+
+  <rect x="350" y="300" width="200" height="40" fill="#1967D2" rx="5"/>
+  <text x="450" y="325" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Classic Load Balancer :80</text>
+
+  <line x1="450" y1="240" x2="450" y2="295" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="460" y="270" fill="#555" font-size="11">Internet</text>
+
+  <rect x="70" y="360" width="400" height="280" fill="#E6F2E6" stroke="#34A853" rx="5"/>
+  <text x="90" y="380" fill="#34A853" font-size="11" font-weight="bold">Subnets Publicas (us-east-1a / us-east-1b)</text>
+
+  <rect x="490" y="360" width="440" height="280" fill="#FCE4EC" stroke="#C62828" rx="5"/>
+  <text x="510" y="380" fill="#C62828" font-size="11" font-weight="bold">Subnet Privada (us-east-1a)</text>
+
+  <rect x="90" y="400" width="360" height="220" fill="#D7AEEB" stroke="#7B1FA2" rx="6"/>
+  <text x="130" y="420" fill="#7B1FA2" font-size="12" font-weight="bold">EKS Cluster — innovatech-cluster (v1.32)</text>
+  <text x="130" y="440" fill="#7B1FA2" font-size="10">Node Group: 2 × t3.medium (min 2, max 4)</text>
+
+  <rect x="100" y="455" width="100" height="55" fill="white" stroke="#7B1FA2" rx="4"/>
+  <text x="150" y="475" text-anchor="middle" fill="#333" font-size="10" font-weight="bold">MySQL</text>
+  <text x="150" y="490" text-anchor="middle" fill="#666" font-size="9">1 replica</text>
+  <text x="150" y="503" text-anchor="middle" fill="#666" font-size="9">ClusterIP :3306</text>
+
+  <rect x="210" y="455" width="110" height="55" fill="white" stroke="#7B1FA2" rx="4"/>
+  <text x="265" y="475" text-anchor="middle" fill="#333" font-size="10" font-weight="bold">back-ventas</text>
+  <text x="265" y="490" text-anchor="middle" fill="#666" font-size="9">3 replicas</text>
+  <text x="265" y="503" text-anchor="middle" fill="#666" font-size="9">ClusterIP :8080</text>
+
+  <rect x="210" y="520" width="110" height="55" fill="white" stroke="#7B1FA2" rx="4"/>
+  <text x="265" y="540" text-anchor="middle" fill="#333" font-size="10" font-weight="bold">back-despachos</text>
+  <text x="265" y="555" text-anchor="middle" fill="#666" font-size="9">3 replicas</text>
+  <text x="265" y="568" text-anchor="middle" fill="#666" font-size="9">ClusterIP :8081</text>
+
+  <rect x="100" y="520" width="100" height="55" fill="white" stroke="#7B1FA2" rx="4"/>
+  <text x="150" y="540" text-anchor="middle" fill="#333" font-size="10" font-weight="bold">api-node</text>
+  <text x="150" y="555" text-anchor="middle" fill="#666" font-size="9">2 replicas</text>
+  <text x="150" y="568" text-anchor="middle" fill="#666" font-size="9">ClusterIP :3000</text>
+
+  <rect x="100" y="585" width="220" height="25" fill="white" stroke="#7B1FA2" rx="4"/>
+  <text x="210" y="602" text-anchor="middle" fill="#333" font-size="10" font-weight="bold">Frontend (Nginx) — 2 replicas — LoadBalancer :80</text>
+
+  <rect x="510" y="420" width="120" height="40" fill="#C62828" rx="5"/>
+  <text x="570" y="445" text-anchor="middle" fill="white" font-size="11" font-weight="bold">NAT Gateway</text>
+
+  <rect x="660" y="420" width="120" height="40" fill="#0288D1" rx="5"/>
+  <text x="720" y="445" text-anchor="middle" fill="white" font-size="11" font-weight="bold">CloudWatch</text>
+
+  <rect x="660" y="480" width="120" height="40" fill="#424242" rx="5"/>
+  <text x="720" y="505" text-anchor="middle" fill="white" font-size="11" font-weight="bold">GitHub Secrets</text>
+
+  <line x1="450" y1="340" x2="270" y2="395" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <line x1="500" y1="200" x2="500" y2="235" stroke="#FF9900" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="4,2"/>
+  <text x="510" y="220" fill="#FF9900" font-size="10">docker push</text>
+
+  <line x1="780" y1="500" x2="320" y2="500" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="3,2"/>
+  <text x="550" y="495" fill="#555" font-size="9">secretos vía GitHub Actions</text>
+
+  <rect x="50" y="670" width="15" height="15" fill="#E8F0FE" stroke="#1967D2"/>
+  <text x="70" y="682" fill="#333" font-size="10">VPC</text>
+  <rect x="150" y="670" width="15" height="15" fill="#D7AEEB" stroke="#7B1FA2"/>
+  <text x="170" y="682" fill="#333" font-size="10">EKS</text>
+  <rect x="250" y="670" width="15" height="15" fill="#E6F2E6" stroke="#34A853"/>
+  <text x="270" y="682" fill="#333" font-size="10">Subnet Publica</text>
+</svg>
