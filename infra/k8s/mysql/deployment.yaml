@@ -54,18 +54,41 @@ spec:
             - configMapRef:
                 name: innovatech-config
 
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 750m
+              memory: 1Gi
+
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
+            - name: mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d
 
-          # Verificaci├│n de salud: K8s no env├¡a tr├ífico hasta que MySQL est├® listo
           readinessProbe:
             exec:
-              command: ["mysqladmin", "ping", "-h", "localhost"]
-            initialDelaySeconds: 20
+              command:
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD"
+            initialDelaySeconds: 60
             periodSeconds: 10
-            failureThreshold: 5
+
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD"
+            initialDelaySeconds: 120
+            periodSeconds: 20
 
       volumes:
         - name: mysql-storage
-          emptyDir: {}    # suficiente para laboratorio; en producci├│n usar RDS
+          emptyDir: {}
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb
