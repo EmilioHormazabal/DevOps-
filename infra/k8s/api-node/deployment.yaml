@@ -20,6 +20,7 @@ spec:
       containers:
         - name: api-node
           image: ${ECR_REGISTRY}/innovatech-poc-api-node:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
 

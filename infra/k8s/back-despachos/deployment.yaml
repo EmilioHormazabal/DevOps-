@@ -20,6 +20,7 @@ spec:
       containers:
         - name: back-despachos
           image: ${ECR_REGISTRY}/innovatech-poc-back-despachos:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - containerPort: 8081
 
