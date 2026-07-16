@@ -20,6 +20,7 @@ spec:
       containers:
         - name: frontend
           image: ${ECR_REGISTRY}/innovatech-poc-frontend:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
 

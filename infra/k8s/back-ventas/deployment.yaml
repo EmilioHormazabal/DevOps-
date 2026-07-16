@@ -20,6 +20,7 @@ spec:
       containers:
         - name: back-ventas
           image: ${ECR_REGISTRY}/innovatech-poc-back-ventas:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
 

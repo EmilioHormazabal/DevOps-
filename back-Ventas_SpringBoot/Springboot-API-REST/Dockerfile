@@ -18,8 +18,13 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Copiamos únicamente el JAR generado
+RUN addgroup -S innovatech && adduser -S innovatech -G innovatech
+
 COPY --from=build /app/target/*.jar app.jar
+
+RUN chown innovatech:innovatech app.jar
+
+USER innovatech
 
 EXPOSE 8080
 

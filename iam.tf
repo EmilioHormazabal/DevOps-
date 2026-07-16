@@ -7,4 +7,3 @@ resource "aws_iam_instance_profile" "ec2" {
   name = "${var.project_name}-ec2-profile"
   role = data.aws_iam_role.lab_role.name
 }
-

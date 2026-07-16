@@ -1,21 +1,25 @@
-# Imagen base: misma que el ejemplo, Node 20 Alpine (ligera)
-FROM node:20-alpine
+# ── Etapa 1: instalacion de dependencias ────────────────────────────────────────
+FROM node:20-alpine AS build
 
-# En qué carpeta vamos a trabajar
 WORKDIR /app
 
-# Copiamos primero package.json para aprovechar la cache de capas de Docker
-# (si no cambian las dependencias, no vuelve a instalar)
 COPY package*.json ./
+RUN npm ci
 
-# Instalamos las dependencias
-RUN npm install --omit=dev
+# ── Etapa 2: produccion ─────────────────────────────────────────────────────────
+FROM node:20-alpine
 
-# Copiamos el resto del código
+WORKDIR /app
+
+RUN addgroup -S innovatech && adduser -S innovatech -G innovatech
+
+COPY --from=build /app/node_modules ./node_modules
 COPY . .
 
-# Exponemos el puerto
+RUN chown -R innovatech:innovatech /app
+
+USER innovatech
+
 EXPOSE 3000
 
-# Ejecutamos la app
 CMD ["node", "src/index.js"]

@@ -19,8 +19,9 @@ render_deployment() {
 }
 
 apply_ordered() {
+  kubectl apply -f infra/k8s/namespace/
+  kubectl apply -f infra/k8s/secrets/
   kubectl apply -f infra/k8s/configmaps/
-  kubectl apply -f infra/k8s/mysql/init-configmap.yaml
   kubectl apply -f infra/k8s/mysql/
 
   render_deployment infra/k8s/back-ventas/deployment.yaml | kubectl apply -f -
@@ -42,7 +43,7 @@ wait_rollout() {
 }
 
 apply_ordered
-wait_rollout mysql 300s
+wait_rollout mysql 600s
 wait_rollout back-ventas 600s
 wait_rollout back-despachos 600s
 wait_rollout api-node 180s

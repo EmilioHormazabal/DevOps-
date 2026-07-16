@@ -10,10 +10,7 @@ RUN npm run build
 # ── Etapa 2: producción ────────────────────────────────────────────────────────
 FROM nginx:alpine
 
-# Copia el build estático
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copia la configuración de Nginx con reverse proxy
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

@@ -15,7 +15,7 @@ jobs:
       - name: Usar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       - name: Instalar y Compilar
         working-directory: api-innovatech
         run: |
@@ -34,11 +34,11 @@ jobs:
       - name: Usar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       - name: Instalar y Compilar
         working-directory: front_despacho
         run: |
-          npm ci
+          npm install
           npm run build --if-present
       - name: Ejecutar pruebas
         working-directory: front_despacho
